@@ -365,6 +365,11 @@ body[data-theme="catppuccin-dark"] {
 
 /* ---- Print / Export PDF: show only the rendered preview, in light colors ---- */
 @media print {
+	/* margin: 0 removes the browser's auto headers/footers (date, page URL). */
+	@page {
+		margin: 0;
+	}
+
 	.app-header,
 	.pane-editor {
 		display: none !important;
@@ -391,7 +396,8 @@ body[data-theme="catppuccin-dark"] {
 
 	.markdown-preview {
 		max-width: none;
-		padding: 0;
+		/* Internal page margins, since @page margin is now 0. */
+		padding: 16mm 14mm;
 		color: #000;
 	}
 }
