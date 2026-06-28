@@ -13,6 +13,7 @@ import {
 import { renderMarkdown } from "./preview/render";
 import { initMathActions } from "./preview/math-actions";
 import { copyToClipboard } from "./clipboard";
+import { buildShareUrl, decodeDoc, getSharedPayload } from "./share";
 import { loadDoc, saveDoc, debounce } from "./storage";
 
 const DEMO_DOC = `# Quick Math
@@ -48,6 +49,7 @@ const previewPane = document.querySelector(".pane-preview") as HTMLElement;
 const exportBtn = document.getElementById("btn-export") as HTMLButtonElement;
 const exportMenu = document.getElementById("export-menu") as HTMLElement;
 const copyBtn = document.getElementById("btn-copy") as HTMLButtonElement;
+const shareBtn = document.getElementById("btn-share") as HTMLButtonElement;
 const themeBtn = document.getElementById("btn-theme") as HTMLButtonElement;
 const themeMenu = document.getElementById("theme-menu") as HTMLElement;
 const modeBtn = document.getElementById("btn-mode") as HTMLButtonElement;
@@ -210,12 +212,38 @@ createEditor({
 		view = v;
 		editorScroller = v.scrollDOM;
 		applySync(syncEnabled);
+		void maybeLoadSharedDoc(v);
 	})
 	.catch((err) => {
 		console.error("Failed to initialise editor:", err);
 		editorParent.textContent =
 			"Failed to initialise the editor — see the console for details.";
 	});
+
+// If the URL carries a shared document (#doc=...), offer to load it.
+async function maybeLoadSharedDoc(v: EditorView) {
+	const payload = getSharedPayload();
+	if (!payload) return;
+	let text: string;
+	try {
+		text = await decodeDoc(payload);
+	} catch (err) {
+		console.error("Invalid share link:", err);
+		return;
+	}
+	// Clear the fragment so a refresh won't reload (or re-prompt for) it.
+	history.replaceState(null, "", location.pathname + location.search);
+	// Confirm before replacing an existing saved document.
+	if (loadDoc() && text !== currentDoc) {
+		const ok = window.confirm(
+			"Open the shared document? This replaces your current document.",
+		);
+		if (!ok) return;
+	}
+	v.dispatch({
+		changes: { from: 0, to: v.state.doc.length, insert: text },
+	});
+}
 
 // ---- Theme dropdown ----
 function setThemeMenuOpen(open: boolean) {
@@ -295,14 +323,33 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ---- Copy raw .md to clipboard ----
-let copyResetTimer: ReturnType<typeof setTimeout> | undefined;
+function flashButton(btn: HTMLButtonElement, msg: string, restore: string) {
+	btn.textContent = msg;
+	window.setTimeout(() => {
+		btn.textContent = restore;
+	}, 1400);
+}
+
 copyBtn.addEventListener("click", async () => {
 	const ok = await copyToClipboard(currentDoc);
-	copyBtn.textContent = ok ? "Copied!" : "Copy failed";
-	if (copyResetTimer) clearTimeout(copyResetTimer);
-	copyResetTimer = setTimeout(() => {
-		copyBtn.textContent = "Copy .md";
-	}, 1400);
+	flashButton(copyBtn, ok ? "Copied!" : "Copy failed", "Copy .md");
+});
+
+// ---- Share: copy a link with the document encoded in the URL fragment ----
+shareBtn.addEventListener("click", async () => {
+	try {
+		const url = await buildShareUrl(currentDoc);
+		// Guard against unwieldy links from very large documents.
+		if (url.length > 8000) {
+			flashButton(shareBtn, "Doc too long", "Share");
+			return;
+		}
+		const ok = await copyToClipboard(url);
+		flashButton(shareBtn, ok ? "Link copied!" : "Copy failed", "Share");
+	} catch (err) {
+		console.error("Share failed:", err);
+		flashButton(shareBtn, "Share failed", "Share");
+	}
 });
 
 syncBtn.addEventListener("click", () => {
