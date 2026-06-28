@@ -22,8 +22,36 @@
         >
           ⇅ Sync scroll
         </button>
-        <button id="btn-save" class="btn" type="button">Save .md</button>
-        <button id="btn-pdf" class="btn" type="button">Export PDF</button>
+        <div class="dropdown">
+          <button
+            id="btn-export"
+            class="btn"
+            type="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            Export ▾
+          </button>
+          <div id="export-menu" class="dropdown-menu" role="menu" hidden>
+            <button
+              class="dropdown-item"
+              type="button"
+              role="menuitem"
+              data-export="pdf"
+            >
+              PDF
+            </button>
+            <button
+              class="dropdown-item"
+              type="button"
+              role="menuitem"
+              data-export="md"
+            >
+              Raw .md file
+            </button>
+          </div>
+        </div>
+        <button id="btn-copy" class="btn" type="button">Copy .md</button>
         <button
           id="btn-theme"
           class="btn btn-icon"

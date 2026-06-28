@@ -71,6 +71,46 @@ body {
 	font-size: 15px;
 }
 
+.dropdown {
+	position: relative;
+}
+
+.dropdown-menu {
+	position: absolute;
+	right: 0;
+	top: calc(100% + 4px);
+	z-index: 20;
+	min-width: 140px;
+	display: flex;
+	flex-direction: column;
+	padding: 4px;
+	background: var(--bg);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.dropdown-menu[hidden] {
+	display: none;
+}
+
+.dropdown-item {
+	font: inherit;
+	font-size: 13px;
+	text-align: left;
+	padding: 7px 10px;
+	border: none;
+	background: transparent;
+	color: var(--text);
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.dropdown-item:hover {
+	background: var(--bg-alt);
+	color: var(--accent);
+}
+
 .app-title {
 	font-weight: 700;
 	color: var(--accent);

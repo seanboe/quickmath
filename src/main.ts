@@ -37,8 +37,9 @@ $$
 const editorParent = document.getElementById("editor")!;
 const preview = document.getElementById("preview")!;
 const previewPane = document.querySelector(".pane-preview") as HTMLElement;
-const saveBtn = document.getElementById("btn-save") as HTMLButtonElement;
-const pdfBtn = document.getElementById("btn-pdf") as HTMLButtonElement;
+const exportBtn = document.getElementById("btn-export") as HTMLButtonElement;
+const exportMenu = document.getElementById("export-menu") as HTMLElement;
+const copyBtn = document.getElementById("btn-copy") as HTMLButtonElement;
 const themeBtn = document.getElementById("btn-theme") as HTMLButtonElement;
 const syncBtn = document.getElementById("btn-sync") as HTMLButtonElement;
 
@@ -175,7 +176,7 @@ themeBtn.addEventListener("click", () => {
 	if (view) setEditorDark(view, dark);
 });
 
-saveBtn.addEventListener("click", () => {
+function downloadMarkdown() {
 	const blob = new Blob([currentDoc], { type: "text/markdown;charset=utf-8" });
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement("a");
@@ -185,11 +186,72 @@ saveBtn.addEventListener("click", () => {
 	a.click();
 	a.remove();
 	URL.revokeObjectURL(url);
-});
+}
 
-pdfBtn.addEventListener("click", () => {
+function exportPdf() {
 	// Print dialog → "Save as PDF". Print CSS shows only the rendered preview.
 	window.print();
+}
+
+// ---- Export dropdown (PDF / raw .md) ----
+function setExportMenuOpen(open: boolean) {
+	exportMenu.hidden = !open;
+	exportBtn.setAttribute("aria-expanded", String(open));
+}
+
+exportBtn.addEventListener("click", (e) => {
+	e.stopPropagation();
+	setExportMenuOpen(exportMenu.hidden);
+});
+
+exportMenu.addEventListener("click", (e) => {
+	const item = (e.target as HTMLElement).closest("[data-export]");
+	if (!item) return;
+	const kind = item.getAttribute("data-export");
+	setExportMenuOpen(false);
+	if (kind === "pdf") exportPdf();
+	else if (kind === "md") downloadMarkdown();
+});
+
+// Close the menu on outside click or Escape.
+document.addEventListener("click", () => setExportMenuOpen(false));
+document.addEventListener("keydown", (e) => {
+	if (e.key === "Escape") setExportMenuOpen(false);
+});
+
+// ---- Copy raw .md to clipboard ----
+async function copyToClipboard(text: string): Promise<boolean> {
+	try {
+		if (navigator.clipboard?.writeText) {
+			await navigator.clipboard.writeText(text);
+			return true;
+		}
+	} catch {
+		// fall through to legacy path
+	}
+	try {
+		const ta = document.createElement("textarea");
+		ta.value = text;
+		ta.style.position = "fixed";
+		ta.style.opacity = "0";
+		document.body.appendChild(ta);
+		ta.select();
+		const ok = document.execCommand("copy");
+		ta.remove();
+		return ok;
+	} catch {
+		return false;
+	}
+}
+
+let copyResetTimer: ReturnType<typeof setTimeout> | undefined;
+copyBtn.addEventListener("click", async () => {
+	const ok = await copyToClipboard(currentDoc);
+	copyBtn.textContent = ok ? "Copied!" : "Copy failed";
+	if (copyResetTimer) clearTimeout(copyResetTimer);
+	copyResetTimer = setTimeout(() => {
+		copyBtn.textContent = "Copy .md";
+	}, 1400);
 });
 
 syncBtn.addEventListener("click", () => {
