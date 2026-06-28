@@ -74,6 +74,46 @@ body {
 	font-size: 15px;
 }
 
+/* Split "oval" pill: theme dropdown (left) + light/dark toggle (right). */
+.seg {
+	display: inline-flex;
+	align-items: stretch;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: var(--bg);
+}
+
+.seg-cell {
+	display: flex;
+}
+
+.seg-btn {
+	font: inherit;
+	font-size: 13px;
+	line-height: 1;
+	background: transparent;
+	border: none;
+	color: var(--text);
+	cursor: pointer;
+	padding: 7px 13px;
+}
+
+.seg-cell .seg-btn {
+	border-radius: 999px 0 0 999px;
+}
+
+.seg-mode {
+	border-left: 1px solid var(--border);
+	border-radius: 0 999px 999px 0;
+	padding: 7px 11px;
+	font-size: 14px;
+}
+
+.seg-btn:hover {
+	background: var(--bg-alt);
+	color: var(--accent);
+}
+
 .dropdown {
 	position: relative;
 }
@@ -245,7 +285,8 @@ body {
 }
 
 /* ---- Color themes (app chrome palette; editor highlighting lives in theme.ts) ---- */
-body[data-theme="dark"] {
+/* "default-light" uses the :root values above. */
+body[data-theme="default-dark"] {
 	--bg: #0f1419;
 	--bg-alt: #1a212b;
 	--border: #2a313c;
@@ -256,7 +297,18 @@ body[data-theme="dark"] {
 	--chip-fg: #c5bdf5;
 }
 
-body[data-theme="ayu"] {
+body[data-theme="ayu-light"] {
+	--bg: #fcfcfc;
+	--bg-alt: #f3f4f5;
+	--border: #e7e8e9;
+	--text: #5c6166;
+	--muted: #8a9199;
+	--accent: #fa8d3e;
+	--chip-bg: #fff1e6;
+	--chip-fg: #d9772b;
+}
+
+body[data-theme="ayu-dark"] {
 	--bg: #1f2430;
 	--bg-alt: #232834;
 	--border: #343b49;
@@ -267,7 +319,18 @@ body[data-theme="ayu"] {
 	--chip-fg: #95e6cb;
 }
 
-body[data-theme="dracula"] {
+body[data-theme="dracula-light"] {
+	--bg: #f8f8f2;
+	--bg-alt: #eeeee6;
+	--border: #dcdcd2;
+	--text: #282a36;
+	--muted: #6c664b;
+	--accent: #644ac9;
+	--chip-bg: #ece9fb;
+	--chip-fg: #644ac9;
+}
+
+body[data-theme="dracula-dark"] {
 	--bg: #282a36;
 	--bg-alt: #21222c;
 	--border: #44475a;
@@ -278,7 +341,18 @@ body[data-theme="dracula"] {
 	--chip-fg: #8be9fd;
 }
 
-body[data-theme="catppuccin"] {
+body[data-theme="catppuccin-light"] {
+	--bg: #eff1f5;
+	--bg-alt: #e6e9ef;
+	--border: #ccd0da;
+	--text: #4c4f69;
+	--muted: #8c8fa1;
+	--accent: #8839ef;
+	--chip-bg: #e6e3fb;
+	--chip-fg: #8839ef;
+}
+
+body[data-theme="catppuccin-dark"] {
 	--bg: #1e1e2e;
 	--bg-alt: #181825;
 	--border: #313244;

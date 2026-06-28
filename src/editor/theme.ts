@@ -3,18 +3,23 @@ import { Extension, Prec } from "@codemirror/state";
 import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { tags as t } from "@lezer/highlight";
 
-export type ThemeName = "light" | "dark" | "ayu" | "dracula" | "catppuccin";
+export type ThemeMode = "light" | "dark";
+export type ThemeFamily = "default" | "ayu" | "dracula" | "catppuccin";
+export type ThemeKey = `${ThemeFamily}-${ThemeMode}`;
 
-export const THEMES: { name: ThemeName; label: string }[] = [
-	{ name: "light", label: "Light" },
-	{ name: "dark", label: "Dark" },
+export const FAMILIES: { name: ThemeFamily; label: string }[] = [
+	{ name: "default", label: "Default" },
 	{ name: "ayu", label: "Ayu Mirage" },
 	{ name: "dracula", label: "Dracula" },
 	{ name: "catppuccin", label: "Catppuccin" },
 ];
 
-// Structural styling that applies to every theme, including the tabstop
-// placeholder highlight used by the LaTeX Suite snippet engine.
+export function themeKey(family: ThemeFamily, mode: ThemeMode): ThemeKey {
+	return `${family}-${mode}`;
+}
+
+// Structural styling shared by every theme, including the tabstop placeholder
+// highlight used by the LaTeX Suite snippet engine.
 export const baseTheme = EditorView.theme({
 	"&": {
 		height: "100%",
@@ -106,6 +111,7 @@ function makeEditorTheme(p: EditorPalette): Extension {
 	return [colors, Prec.high(syntaxHighlighting(highlight))];
 }
 
+// ---- Dark palettes ----
 const darkPalette: EditorPalette = {
 	dark: true,
 	bg: "#0f1419",
@@ -126,7 +132,7 @@ const darkPalette: EditorPalette = {
 	mark: "#5b6472",
 };
 
-const ayuPalette: EditorPalette = {
+const ayuDarkPalette: EditorPalette = {
 	dark: true,
 	bg: "#1f2430",
 	fg: "#cccac2",
@@ -146,7 +152,7 @@ const ayuPalette: EditorPalette = {
 	mark: "#707a8c",
 };
 
-const draculaPalette: EditorPalette = {
+const draculaDarkPalette: EditorPalette = {
 	dark: true,
 	bg: "#282a36",
 	fg: "#f8f8f2",
@@ -166,7 +172,7 @@ const draculaPalette: EditorPalette = {
 	mark: "#6272a4",
 };
 
-const catppuccinPalette: EditorPalette = {
+const catppuccinDarkPalette: EditorPalette = {
 	dark: true,
 	bg: "#1e1e2e",
 	fg: "#cdd6f4",
@@ -186,11 +192,75 @@ const catppuccinPalette: EditorPalette = {
 	mark: "#6c7086",
 };
 
-// Light keeps the original look: basicSetup's default theme + highlight style.
-export const editorThemes: Record<ThemeName, Extension> = {
-	light: [],
-	dark: makeEditorTheme(darkPalette),
-	ayu: makeEditorTheme(ayuPalette),
-	dracula: makeEditorTheme(draculaPalette),
-	catppuccin: makeEditorTheme(catppuccinPalette),
+// ---- Light palettes ----
+const ayuLightPalette: EditorPalette = {
+	dark: false,
+	bg: "#fcfcfc",
+	fg: "#5c6166",
+	caret: "#ff9940",
+	selection: "#cfe6f5",
+	gutterBg: "#fcfcfc",
+	gutterFg: "#959da6",
+	activeLine: "rgba(0, 0, 0, 0.03)",
+	heading: "#fa8d3e",
+	bold: "#f07171",
+	italic: "#a37acc",
+	link: "#399ee6",
+	code: "#86b300",
+	list: "#fa8d3e",
+	quote: "#787b80",
+	comment: "#abb0b6",
+	mark: "#abb0b6",
+};
+
+const draculaLightPalette: EditorPalette = {
+	dark: false,
+	bg: "#f8f8f2",
+	fg: "#1f1f1f",
+	caret: "#644ac9",
+	selection: "#dcdcd2",
+	gutterBg: "#f8f8f2",
+	gutterFg: "#9a957f",
+	activeLine: "rgba(0, 0, 0, 0.03)",
+	heading: "#a3144d",
+	bold: "#a34d14",
+	italic: "#846e15",
+	link: "#036a96",
+	code: "#14710a",
+	list: "#644ac9",
+	quote: "#635d49",
+	comment: "#8c876d",
+	mark: "#8c876d",
+};
+
+const catppuccinLightPalette: EditorPalette = {
+	dark: false,
+	bg: "#eff1f5",
+	fg: "#4c4f69",
+	caret: "#dc8a78",
+	selection: "#ccd0da",
+	gutterBg: "#eff1f5",
+	gutterFg: "#8c8fa1",
+	activeLine: "rgba(0, 0, 0, 0.03)",
+	heading: "#d20f39",
+	bold: "#fe640b",
+	italic: "#df8e1d",
+	link: "#1e66f5",
+	code: "#40a02b",
+	list: "#8839ef",
+	quote: "#6c6f85",
+	comment: "#8c8fa1",
+	mark: "#8c8fa1",
+};
+
+// Default Light keeps the original look: basicSetup's default theme + highlight.
+export const editorThemes: Record<ThemeKey, Extension> = {
+	"default-light": [],
+	"default-dark": makeEditorTheme(darkPalette),
+	"ayu-light": makeEditorTheme(ayuLightPalette),
+	"ayu-dark": makeEditorTheme(ayuDarkPalette),
+	"dracula-light": makeEditorTheme(draculaLightPalette),
+	"dracula-dark": makeEditorTheme(draculaDarkPalette),
+	"catppuccin-light": makeEditorTheme(catppuccinLightPalette),
+	"catppuccin-dark": makeEditorTheme(catppuccinDarkPalette),
 };

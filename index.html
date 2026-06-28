@@ -52,17 +52,28 @@
           </div>
         </div>
         <button id="btn-copy" class="btn" type="button">Copy .md</button>
-        <div class="dropdown">
+        <div class="seg">
+          <div class="dropdown seg-cell">
+            <button
+              id="btn-theme"
+              class="seg-btn"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              Theme ▾
+            </button>
+            <div id="theme-menu" class="dropdown-menu" role="menu" hidden></div>
+          </div>
           <button
-            id="btn-theme"
-            class="btn"
+            id="btn-mode"
+            class="seg-btn seg-mode"
             type="button"
-            aria-haspopup="true"
-            aria-expanded="false"
+            title="Toggle light / dark mode"
+            aria-label="Toggle light / dark mode"
           >
-            Theme ▾
+            🌙
           </button>
-          <div id="theme-menu" class="dropdown-menu" role="menu" hidden></div>
         </div>
       </div>
     </header>

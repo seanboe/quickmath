@@ -4,7 +4,12 @@ import "./style.css";
 
 import { EditorView } from "@codemirror/view";
 import { createEditor, setEditorTheme } from "./editor/editor";
-import { THEMES, type ThemeName } from "./editor/theme";
+import {
+	FAMILIES,
+	themeKey,
+	type ThemeFamily,
+	type ThemeMode,
+} from "./editor/theme";
 import { renderMarkdown } from "./preview/render";
 import { loadDoc, saveDoc, debounce } from "./storage";
 
@@ -43,45 +48,62 @@ const exportMenu = document.getElementById("export-menu") as HTMLElement;
 const copyBtn = document.getElementById("btn-copy") as HTMLButtonElement;
 const themeBtn = document.getElementById("btn-theme") as HTMLButtonElement;
 const themeMenu = document.getElementById("theme-menu") as HTMLElement;
+const modeBtn = document.getElementById("btn-mode") as HTMLButtonElement;
 const syncBtn = document.getElementById("btn-sync") as HTMLButtonElement;
 
 // Editor handle, declared early so applyTheme can reach it once it exists.
 let view: EditorView | undefined;
 
-// ---- Color theme ----
-const THEME_KEY = "latex-suite-web:theme";
-const THEME_NAMES = THEMES.map((th) => th.name);
+// ---- Color theme (family × light/dark mode) ----
+const LEGACY_THEME_KEY = "latex-suite-web:theme";
+const FAMILY_KEY = "quickmath:theme-family";
+const MODE_KEY = "quickmath:theme-mode";
+const FAMILY_NAMES = FAMILIES.map((f) => f.name);
 
-function getInitialTheme(): ThemeName {
-	const stored = localStorage.getItem(THEME_KEY) as ThemeName | null;
-	if (stored && THEME_NAMES.includes(stored)) return stored;
-	return window.matchMedia?.("(prefers-color-scheme: dark)").matches
-		? "dark"
-		: "light";
+function getInitialTheme(): { family: ThemeFamily; mode: ThemeMode } {
+	const f = localStorage.getItem(FAMILY_KEY) as ThemeFamily | null;
+	const m = localStorage.getItem(MODE_KEY) as ThemeMode | null;
+	if (f && FAMILY_NAMES.includes(f) && (m === "light" || m === "dark")) {
+		return { family: f, mode: m };
+	}
+	// Migrate from the older single-theme setting, if present.
+	const legacy = localStorage.getItem(LEGACY_THEME_KEY);
+	if (legacy === "light") return { family: "default", mode: "light" };
+	if (legacy === "dark") return { family: "default", mode: "dark" };
+	if (legacy === "ayu") return { family: "ayu", mode: "dark" };
+	if (legacy === "dracula") return { family: "dracula", mode: "dark" };
+	if (legacy === "catppuccin") return { family: "catppuccin", mode: "dark" };
+	const prefersDark =
+		window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+	return { family: "default", mode: prefersDark ? "dark" : "light" };
 }
 
-let theme = getInitialTheme();
+let { family, mode } = getInitialTheme();
 
-// Build the theme menu items from the THEMES list.
-for (const { name, label } of THEMES) {
+// Build the theme menu (color families) from the FAMILIES list.
+for (const { name, label } of FAMILIES) {
 	const item = document.createElement("button");
 	item.type = "button";
 	item.className = "dropdown-item";
 	item.setAttribute("role", "menuitemradio");
-	item.dataset.theme = name;
+	item.dataset.family = name;
 	item.textContent = label;
 	themeMenu.appendChild(item);
 }
 
-function applyTheme(name: ThemeName) {
-	theme = name;
-	document.body.dataset.theme = name;
-	if (view) setEditorTheme(view, name);
+function applyTheme() {
+	const key = themeKey(family, mode);
+	document.body.dataset.theme = key;
+	if (view) setEditorTheme(view, key);
 	for (const item of Array.from(themeMenu.children) as HTMLElement[]) {
-		item.classList.toggle("active", item.dataset.theme === name);
+		item.classList.toggle("active", item.dataset.family === family);
 	}
+	// The mode button shows the icon for the mode you'd switch TO.
+	modeBtn.textContent = mode === "dark" ? "☀️" : "🌙";
+	modeBtn.title =
+		mode === "dark" ? "Switch to light mode" : "Switch to dark mode";
 }
-applyTheme(theme);
+applyTheme();
 
 // ---- Editor + preview ----
 const render = (doc: string) => {
@@ -96,7 +118,8 @@ render(initialDoc);
 
 // ---- Synchronized scrolling ----
 const SYNC_KEY = "latex-suite-web:sync";
-let syncEnabled = localStorage.getItem(SYNC_KEY) === "on";
+// Synchronized scrolling is on by default (unless explicitly turned off).
+let syncEnabled = localStorage.getItem(SYNC_KEY) !== "off";
 let editorScroller: HTMLElement | null = null;
 
 // Only the pane the user is actively interacting with ("leader") drives the
@@ -170,7 +193,7 @@ function applySync(on: boolean) {
 createEditor({
 	parent: editorParent,
 	doc: initialDoc,
-	theme,
+	theme: themeKey(family, mode),
 	onChange: (doc) => {
 		currentDoc = doc;
 		scheduleRender(doc);
@@ -201,12 +224,18 @@ themeBtn.addEventListener("click", (e) => {
 });
 
 themeMenu.addEventListener("click", (e) => {
-	const item = (e.target as HTMLElement).closest("[data-theme]");
+	const item = (e.target as HTMLElement).closest("[data-family]");
 	if (!item) return;
-	const name = item.getAttribute("data-theme") as ThemeName;
-	localStorage.setItem(THEME_KEY, name);
-	applyTheme(name);
+	family = item.getAttribute("data-family") as ThemeFamily;
+	localStorage.setItem(FAMILY_KEY, family);
+	applyTheme();
 	setThemeMenuOpen(false);
+});
+
+modeBtn.addEventListener("click", () => {
+	mode = mode === "dark" ? "light" : "dark";
+	localStorage.setItem(MODE_KEY, mode);
+	applyTheme();
 });
 
 function downloadMarkdown() {

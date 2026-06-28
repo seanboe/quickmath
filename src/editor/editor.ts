@@ -4,12 +4,12 @@ import { keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 import { markdown } from "@codemirror/lang-markdown";
 import { buildLatexSuiteExtensions } from "./latex-suite/setup";
-import { baseTheme, editorThemes, ThemeName } from "./theme";
+import { baseTheme, editorThemes, ThemeKey } from "./theme";
 
 export interface CreateEditorOptions {
 	parent: HTMLElement;
 	doc: string;
-	theme: ThemeName;
+	theme: ThemeKey;
 	onChange: (doc: string) => void;
 }
 
@@ -50,7 +50,7 @@ export async function createEditor({
 	return view;
 }
 
-export function setEditorTheme(view: EditorView, theme: ThemeName): void {
+export function setEditorTheme(view: EditorView, theme: ThemeKey): void {
 	view.dispatch({
 		effects: themeCompartment.reconfigure(editorThemes[theme]),
 	});
