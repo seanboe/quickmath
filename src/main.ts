@@ -7,12 +7,13 @@ import { createEditor, setEditorDark } from "./editor/editor";
 import { renderMarkdown } from "./preview/render";
 import { loadDoc, saveDoc, debounce } from "./storage";
 
-const DEMO_DOC = `# LaTeX Suite — Markdown Editor
+const DEMO_DOC = `# Quick Math
+
+**Quick Math** is an online Markdown editor with live preview and fast LaTeX math typing —
+based on [obsidian-latex-suite](https://github.com/artisticat1/obsidian-latex-suite), so it
+uses the same snippet shortcuts.
 
 Type Markdown on the left; it renders live on the right.
-
-Math uses the same fast typing shortcuts as
-[obsidian-latex-suite](https://github.com/artisticat1/obsidian-latex-suite).
 
 ## Try it
 

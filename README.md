@@ -1,4 +1,4 @@
-# LaTeX Suite — Online Markdown Editor
+# Quick Math — Online Markdown Editor
 
 A browser-based, split-pane Markdown editor with live preview and **LaTeX math typing
 shortcuts** ported from [obsidian-latex-suite](https://github.com/artisticat1/obsidian-latex-suite).
