@@ -23,6 +23,30 @@ npm run preview  # preview the production build
 > **Node version:** this project targets **Node 16+** and uses Vite 4 for that reason. It
 > works on newer Node too; if you upgrade to Node 18/20 you can bump to Vite 5 if desired.
 
+## Deploy to GitHub Pages
+
+This repo includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that builds
+the site and publishes it to GitHub Pages on every push to `main`/`master`.
+
+One-time setup:
+
+1. Push this repo to GitHub (it can be a project repo; the build uses a relative `base`, so
+   it works at `https://<user>.github.io/<repo>/` without extra config):
+   ```bash
+   git add .
+   git commit -m "Prepare for GitHub Pages"
+   git remote add origin git@github.com:<user>/<repo>.git
+   git push -u origin master   # or main
+   ```
+2. On GitHub: **Settings → Pages → Build and deployment → Source → "GitHub Actions"**.
+3. The workflow runs automatically; the live URL appears in the Actions run summary and on
+   the Pages settings screen.
+
+Notes:
+- `dist/` and `node_modules/` are git-ignored — the site is built fresh in CI.
+- `public/.nojekyll` prevents GitHub from running Jekyll on the output.
+- CI builds with Node 20; locally the project targets Node 16 via Vite 4.
+
 ## LaTeX typing shortcuts
 
 These fire while the cursor is inside math (`$ … $` or `$$ … $$`):
