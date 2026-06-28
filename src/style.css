@@ -284,6 +284,60 @@ body {
 	outline: none;
 }
 
+/* ---- Math block hover + right-click actions (preview side) ---- */
+/* Base state on every math block so the highlight can transition in and out. */
+.markdown-preview .katex,
+.markdown-preview .katex-display {
+	border-radius: 4px;
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+	/* Both the fill and the border fade in/out. */
+	transition: background-color 0.3s ease, outline-color 0.3s ease;
+	transition-delay: 0.08s;
+}
+
+/* Highlight color follows the active theme's accent.
+   Scoped with .markdown-preview so it outranks the transparent base outline. */
+.markdown-preview .qm-math-hover {
+	background: color-mix(in srgb, var(--accent) 16%, transparent);
+	outline-color: color-mix(in srgb, var(--accent) 55%, transparent);
+	cursor: context-menu;
+}
+
+.context-menu {
+	position: fixed;
+	z-index: 1000;
+	min-width: 170px;
+	display: flex;
+	flex-direction: column;
+	padding: 4px;
+	background: var(--bg);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.context-menu[hidden] {
+	display: none;
+}
+
+.context-item {
+	font: inherit;
+	font-size: 13px;
+	text-align: left;
+	padding: 7px 10px;
+	border: none;
+	background: transparent;
+	color: var(--text);
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.context-item:hover {
+	background: var(--bg-alt);
+	color: var(--accent);
+}
+
 /* ---- Color themes (app chrome palette; editor highlighting lives in theme.ts) ---- */
 /* "default-light" uses the :root values above. */
 body[data-theme="default-dark"] {

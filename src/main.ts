@@ -11,6 +11,8 @@ import {
 	type ThemeMode,
 } from "./editor/theme";
 import { renderMarkdown } from "./preview/render";
+import { initMathActions } from "./preview/math-actions";
+import { copyToClipboard } from "./clipboard";
 import { loadDoc, saveDoc, debounce } from "./storage";
 
 const DEMO_DOC = `# Quick Math
@@ -116,6 +118,9 @@ const scheduleSave = debounce(saveDoc, 300);
 const initialDoc = loadDoc() ?? DEMO_DOC;
 let currentDoc = initialDoc;
 render(initialDoc);
+
+// Right-click actions (copy LaTeX / save SVG) on rendered math blocks.
+initMathActions(preview);
 
 // ---- Synchronized scrolling ----
 const SYNC_KEY = "latex-suite-web:sync";
@@ -290,30 +295,6 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ---- Copy raw .md to clipboard ----
-async function copyToClipboard(text: string): Promise<boolean> {
-	try {
-		if (navigator.clipboard?.writeText) {
-			await navigator.clipboard.writeText(text);
-			return true;
-		}
-	} catch {
-		// fall through to legacy path
-	}
-	try {
-		const ta = document.createElement("textarea");
-		ta.value = text;
-		ta.style.position = "fixed";
-		ta.style.opacity = "0";
-		document.body.appendChild(ta);
-		ta.select();
-		const ok = document.execCommand("copy");
-		ta.remove();
-		return ok;
-	} catch {
-		return false;
-	}
-}
-
 let copyResetTimer: ReturnType<typeof setTimeout> | undefined;
 copyBtn.addEventListener("click", async () => {
 	const ok = await copyToClipboard(currentDoc);
