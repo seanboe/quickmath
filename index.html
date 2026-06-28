@@ -52,15 +52,18 @@
           </div>
         </div>
         <button id="btn-copy" class="btn" type="button">Copy .md</button>
-        <button
-          id="btn-theme"
-          class="btn btn-icon"
-          type="button"
-          title="Toggle dark mode"
-          aria-label="Toggle dark mode"
-        >
-          🌙
-        </button>
+        <div class="dropdown">
+          <button
+            id="btn-theme"
+            class="btn"
+            type="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            Theme ▾
+          </button>
+          <div id="theme-menu" class="dropdown-menu" role="menu" hidden></div>
+        </div>
       </div>
     </header>
     <main class="panes">

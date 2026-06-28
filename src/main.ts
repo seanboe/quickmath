@@ -3,7 +3,8 @@ import "katex/dist/katex.min.css";
 import "./style.css";
 
 import { EditorView } from "@codemirror/view";
-import { createEditor, setEditorDark } from "./editor/editor";
+import { createEditor, setEditorTheme } from "./editor/editor";
+import { THEMES, type ThemeName } from "./editor/theme";
 import { renderMarkdown } from "./preview/render";
 import { loadDoc, saveDoc, debounce } from "./storage";
 
@@ -41,25 +42,46 @@ const exportBtn = document.getElementById("btn-export") as HTMLButtonElement;
 const exportMenu = document.getElementById("export-menu") as HTMLElement;
 const copyBtn = document.getElementById("btn-copy") as HTMLButtonElement;
 const themeBtn = document.getElementById("btn-theme") as HTMLButtonElement;
+const themeMenu = document.getElementById("theme-menu") as HTMLElement;
 const syncBtn = document.getElementById("btn-sync") as HTMLButtonElement;
 
-// ---- Theme (dark mode) ----
+// Editor handle, declared early so applyTheme can reach it once it exists.
+let view: EditorView | undefined;
+
+// ---- Color theme ----
 const THEME_KEY = "latex-suite-web:theme";
+const THEME_NAMES = THEMES.map((th) => th.name);
 
-function getInitialDark(): boolean {
-	const stored = localStorage.getItem(THEME_KEY);
-	if (stored === "dark") return true;
-	if (stored === "light") return false;
-	return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+function getInitialTheme(): ThemeName {
+	const stored = localStorage.getItem(THEME_KEY) as ThemeName | null;
+	if (stored && THEME_NAMES.includes(stored)) return stored;
+	return window.matchMedia?.("(prefers-color-scheme: dark)").matches
+		? "dark"
+		: "light";
 }
 
-let dark = getInitialDark();
+let theme = getInitialTheme();
 
-function applyTheme(isDark: boolean) {
-	document.body.classList.toggle("dark", isDark);
-	themeBtn.textContent = isDark ? "☀️" : "🌙";
+// Build the theme menu items from the THEMES list.
+for (const { name, label } of THEMES) {
+	const item = document.createElement("button");
+	item.type = "button";
+	item.className = "dropdown-item";
+	item.setAttribute("role", "menuitemradio");
+	item.dataset.theme = name;
+	item.textContent = label;
+	themeMenu.appendChild(item);
 }
-applyTheme(dark);
+
+function applyTheme(name: ThemeName) {
+	theme = name;
+	document.body.dataset.theme = name;
+	if (view) setEditorTheme(view, name);
+	for (const item of Array.from(themeMenu.children) as HTMLElement[]) {
+		item.classList.toggle("active", item.dataset.theme === name);
+	}
+}
+applyTheme(theme);
 
 // ---- Editor + preview ----
 const render = (doc: string) => {
@@ -71,8 +93,6 @@ const scheduleSave = debounce(saveDoc, 300);
 const initialDoc = loadDoc() ?? DEMO_DOC;
 let currentDoc = initialDoc;
 render(initialDoc);
-
-let view: EditorView | undefined;
 
 // ---- Synchronized scrolling ----
 const SYNC_KEY = "latex-suite-web:sync";
@@ -150,7 +170,7 @@ function applySync(on: boolean) {
 createEditor({
 	parent: editorParent,
 	doc: initialDoc,
-	dark,
+	theme,
 	onChange: (doc) => {
 		currentDoc = doc;
 		scheduleRender(doc);
@@ -168,12 +188,25 @@ createEditor({
 			"Failed to initialise the editor — see the console for details.";
 	});
 
-// ---- Button actions ----
-themeBtn.addEventListener("click", () => {
-	dark = !dark;
-	localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
-	applyTheme(dark);
-	if (view) setEditorDark(view, dark);
+// ---- Theme dropdown ----
+function setThemeMenuOpen(open: boolean) {
+	themeMenu.hidden = !open;
+	themeBtn.setAttribute("aria-expanded", String(open));
+}
+
+themeBtn.addEventListener("click", (e) => {
+	e.stopPropagation();
+	setExportMenuOpen(false);
+	setThemeMenuOpen(themeMenu.hidden);
+});
+
+themeMenu.addEventListener("click", (e) => {
+	const item = (e.target as HTMLElement).closest("[data-theme]");
+	if (!item) return;
+	const name = item.getAttribute("data-theme") as ThemeName;
+	localStorage.setItem(THEME_KEY, name);
+	applyTheme(name);
+	setThemeMenuOpen(false);
 });
 
 function downloadMarkdown() {
@@ -201,6 +234,7 @@ function setExportMenuOpen(open: boolean) {
 
 exportBtn.addEventListener("click", (e) => {
 	e.stopPropagation();
+	setThemeMenuOpen(false);
 	setExportMenuOpen(exportMenu.hidden);
 });
 
@@ -213,10 +247,16 @@ exportMenu.addEventListener("click", (e) => {
 	else if (kind === "md") downloadMarkdown();
 });
 
-// Close the menu on outside click or Escape.
-document.addEventListener("click", () => setExportMenuOpen(false));
+// Close menus on outside click or Escape.
+document.addEventListener("click", () => {
+	setExportMenuOpen(false);
+	setThemeMenuOpen(false);
+});
 document.addEventListener("keydown", (e) => {
-	if (e.key === "Escape") setExportMenuOpen(false);
+	if (e.key === "Escape") {
+		setExportMenuOpen(false);
+		setThemeMenuOpen(false);
+	}
 });
 
 // ---- Copy raw .md to clipboard ----

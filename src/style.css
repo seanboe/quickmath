@@ -1,3 +1,4 @@
+/* Light is the default palette (also used for body[data-theme="light"]). */
 :root {
 	--bg: #ffffff;
 	--bg-alt: #f6f7f9;
@@ -5,6 +6,8 @@
 	--text: #1f2329;
 	--muted: #6b7280;
 	--accent: #5b51c9;
+	--chip-bg: #eceaf8;
+	--chip-fg: #4b3fb0;
 }
 
 * {
@@ -111,6 +114,21 @@ body {
 	color: var(--accent);
 }
 
+.dropdown-item.active {
+	color: var(--accent);
+	font-weight: 600;
+}
+
+.dropdown-item.active::before {
+	content: "✓ ";
+}
+
+.dropdown-item:not(.active)::before {
+	content: "";
+	display: inline-block;
+	width: 1ch;
+}
+
 .app-title {
 	font-weight: 700;
 	color: var(--accent);
@@ -123,8 +141,8 @@ body {
 
 .app-hint code,
 .app-header code {
-	background: #eceaf8;
-	color: #4b3fb0;
+	background: var(--chip-bg);
+	color: var(--chip-fg);
 	padding: 1px 5px;
 	border-radius: 4px;
 	font-size: 12px;
@@ -226,20 +244,49 @@ body {
 	outline: none;
 }
 
-/* ---- Dark mode ---- */
-body.dark {
+/* ---- Color themes (app chrome palette; editor highlighting lives in theme.ts) ---- */
+body[data-theme="dark"] {
 	--bg: #0f1419;
 	--bg-alt: #1a212b;
 	--border: #2a313c;
 	--text: #d6deeb;
 	--muted: #8a93a3;
 	--accent: #9d92f0;
+	--chip-bg: #2a2150;
+	--chip-fg: #c5bdf5;
 }
 
-body.dark .app-hint code,
-body.dark .app-header code {
-	background: #2a2150;
-	color: #c5bdf5;
+body[data-theme="ayu"] {
+	--bg: #1f2430;
+	--bg-alt: #232834;
+	--border: #343b49;
+	--text: #cccac2;
+	--muted: #707a8c;
+	--accent: #ffcc66;
+	--chip-bg: #2a3344;
+	--chip-fg: #95e6cb;
+}
+
+body[data-theme="dracula"] {
+	--bg: #282a36;
+	--bg-alt: #21222c;
+	--border: #44475a;
+	--text: #f8f8f2;
+	--muted: #6272a4;
+	--accent: #bd93f9;
+	--chip-bg: #343746;
+	--chip-fg: #8be9fd;
+}
+
+body[data-theme="catppuccin"] {
+	--bg: #1e1e2e;
+	--bg-alt: #181825;
+	--border: #313244;
+	--text: #cdd6f4;
+	--muted: #9399b2;
+	--accent: #cba6f7;
+	--chip-bg: #313244;
+	--chip-fg: #a6e3a1;
 }
 
 /* ---- Print / Export PDF: show only the rendered preview, in light colors ---- */
