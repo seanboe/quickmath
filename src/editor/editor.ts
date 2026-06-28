@@ -1,20 +1,24 @@
 import { EditorView, basicSetup } from "codemirror";
-import { EditorState } from "@codemirror/state";
+import { Compartment, EditorState } from "@codemirror/state";
 import { keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 import { markdown } from "@codemirror/lang-markdown";
 import { buildLatexSuiteExtensions } from "./latex-suite/setup";
-import { editorTheme } from "./theme";
+import { baseTheme, lightThemeExt, darkThemeExt } from "./theme";
 
 export interface CreateEditorOptions {
 	parent: HTMLElement;
 	doc: string;
+	dark: boolean;
 	onChange: (doc: string) => void;
 }
+
+const themeCompartment = new Compartment();
 
 export async function createEditor({
 	parent,
 	doc,
+	dark,
 	onChange,
 }: CreateEditorOptions): Promise<EditorView> {
 	const latexSuite = await buildLatexSuiteExtensions();
@@ -27,6 +31,9 @@ export async function createEditor({
 				// LaTeX Suite first; its high-precedence keyboard plugin claims
 				// Tab / snippet triggers before the default keymaps.
 				latexSuite,
+				// Theme compartment before basicSetup so a dark highlight overrides
+				// basicSetup's default light highlight style.
+				themeCompartment.of(dark ? darkThemeExt : lightThemeExt),
 				basicSetup,
 				markdown({ codeLanguages: [] }),
 				EditorView.lineWrapping,
@@ -35,10 +42,16 @@ export async function createEditor({
 				EditorView.updateListener.of((u) => {
 					if (u.docChanged) onChange(u.state.doc.toString());
 				}),
-				editorTheme,
+				baseTheme,
 			],
 		}),
 	});
 
 	return view;
+}
+
+export function setEditorDark(view: EditorView, dark: boolean): void {
+	view.dispatch({
+		effects: themeCompartment.reconfigure(dark ? darkThemeExt : lightThemeExt),
+	});
 }

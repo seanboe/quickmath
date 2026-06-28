@@ -7,6 +7,9 @@ shortcuts** ported from [obsidian-latex-suite](https://github.com/artisticat1/ob
 - **Right pane:** live HTML preview rendered with `markdown-it` + KaTeX (inline `$…$` and
   display `$$…$$`).
 - Your document auto-saves to `localStorage`.
+- Top-right controls: **Save .md** (download the source), **Export PDF** (opens the print
+  dialog showing only the rendered preview — choose "Save as PDF"), and a **dark-mode**
+  toggle (remembered across reloads, defaults to your OS preference).
 
 ## Quick start
 

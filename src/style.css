@@ -29,12 +29,46 @@ body {
 
 .app-header {
 	display: flex;
-	align-items: baseline;
+	align-items: center;
 	gap: 16px;
-	padding: 10px 18px;
+	padding: 8px 18px;
 	border-bottom: 1px solid var(--border);
 	background: var(--bg-alt);
 	flex: 0 0 auto;
+}
+
+.app-actions {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.btn {
+	font: inherit;
+	font-size: 13px;
+	line-height: 1;
+	padding: 7px 12px;
+	border: 1px solid var(--border);
+	background: var(--bg);
+	color: var(--text);
+	border-radius: 6px;
+	cursor: pointer;
+	transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.btn:hover {
+	background: var(--bg-alt);
+	border-color: var(--accent);
+}
+
+.btn:active {
+	transform: translateY(1px);
+}
+
+.btn-icon {
+	padding: 6px 9px;
+	font-size: 15px;
 }
 
 .app-title {
@@ -61,6 +95,18 @@ body {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	min-height: 0;
+}
+
+/* Active/pressed state for toggle buttons in the header (e.g. Sync scroll). */
+.btn.active {
+	background: var(--accent);
+	border-color: var(--accent);
+	color: #fff;
+}
+
+.btn.active:hover {
+	background: var(--accent);
+	color: #fff;
 }
 
 .pane {
@@ -138,4 +184,53 @@ body {
 
 .cm-editor.cm-focused {
 	outline: none;
+}
+
+/* ---- Dark mode ---- */
+body.dark {
+	--bg: #0f1419;
+	--bg-alt: #1a212b;
+	--border: #2a313c;
+	--text: #d6deeb;
+	--muted: #8a93a3;
+	--accent: #9d92f0;
+}
+
+body.dark .app-hint code,
+body.dark .app-header code {
+	background: #2a2150;
+	color: #c5bdf5;
+}
+
+/* ---- Print / Export PDF: show only the rendered preview, in light colors ---- */
+@media print {
+	.app-header,
+	.pane-editor {
+		display: none !important;
+	}
+
+	body {
+		display: block;
+		height: auto;
+		background: #fff;
+		color: #000;
+	}
+
+	.panes {
+		display: block;
+		height: auto;
+	}
+
+	.pane,
+	.pane-preview {
+		overflow: visible;
+		border: none;
+		background: #fff;
+	}
+
+	.markdown-preview {
+		max-width: none;
+		padding: 0;
+		color: #000;
+	}
 }
