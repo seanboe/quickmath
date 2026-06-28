@@ -50,6 +50,7 @@ const themeBtn = document.getElementById("btn-theme") as HTMLButtonElement;
 const themeMenu = document.getElementById("theme-menu") as HTMLElement;
 const modeBtn = document.getElementById("btn-mode") as HTMLButtonElement;
 const syncBtn = document.getElementById("btn-sync") as HTMLButtonElement;
+const resetBtn = document.getElementById("btn-reset") as HTMLButtonElement;
 
 // Editor handle, declared early so applyTheme can reach it once it exists.
 let view: EditorView | undefined;
@@ -327,4 +328,18 @@ syncBtn.addEventListener("click", () => {
 	syncEnabled = !syncEnabled;
 	localStorage.setItem(SYNC_KEY, syncEnabled ? "on" : "off");
 	applySync(syncEnabled);
+});
+
+// ---- Reset: clear saved data (document, theme, settings) ----
+resetBtn.addEventListener("click", () => {
+	const ok = window.confirm(
+		"Clear all saved data (your document, theme, and settings) and reset Quick Math?",
+	);
+	if (!ok) return;
+	try {
+		localStorage.clear();
+	} catch {
+		// ignore storage errors
+	}
+	location.reload();
 });
