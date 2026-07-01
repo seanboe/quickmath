@@ -12,7 +12,7 @@ import {
 } from "./editor/theme";
 import { renderMarkdown } from "./preview/render";
 import { initMathActions } from "./preview/math-actions";
-import { copyToClipboard } from "./clipboard";
+import { copyAsyncText, copyToClipboard } from "./clipboard";
 import { buildShareUrl, decodeDoc, getSharedPayload } from "./share";
 import { loadDoc, saveDoc, debounce } from "./storage";
 
@@ -337,18 +337,28 @@ copyBtn.addEventListener("click", async () => {
 
 // ---- Share: copy a link with the document encoded in the URL fragment ----
 shareBtn.addEventListener("click", async () => {
-	try {
+	// Build the link and copy inside one gesture: the URL is produced lazily so the
+	// clipboard write can keep the user activation across the async gzip step (Safari).
+	let tooLong = false;
+	const makeUrl = async () => {
 		const url = await buildShareUrl(currentDoc);
 		// Guard against unwieldy links from very large documents.
 		if (url.length > 8000) {
-			flashButton(shareBtn, "Doc too long", "Share");
-			return;
+			tooLong = true;
+			throw new Error("share link too long");
 		}
-		const ok = await copyToClipboard(url);
-		flashButton(shareBtn, ok ? "Link copied!" : "Copy failed", "Share");
+		return url;
+	};
+	try {
+		const ok = await copyAsyncText(makeUrl);
+		if (tooLong) {
+			flashButton(shareBtn, "Doc too long", "Share");
+		} else {
+			flashButton(shareBtn, ok ? "Link copied!" : "Copy failed", "Share");
+		}
 	} catch (err) {
 		console.error("Share failed:", err);
-		flashButton(shareBtn, "Share failed", "Share");
+		flashButton(shareBtn, tooLong ? "Doc too long" : "Share failed", "Share");
 	}
 });
 
