@@ -3,6 +3,7 @@ import { Compartment, EditorState } from "@codemirror/state";
 import { keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 import { markdown } from "@codemirror/lang-markdown";
+import { languages } from "@codemirror/language-data";
 import { buildLatexSuiteExtensions } from "./latex-suite/setup";
 import { baseTheme, editorThemes, ThemeKey } from "./theme";
 
@@ -35,7 +36,9 @@ export async function createEditor({
 				// overrides basicSetup's default light highlight style.
 				themeCompartment.of(editorThemes[theme]),
 				basicSetup,
-				markdown({ codeLanguages: [] }),
+				// Per-language parsers for fenced code blocks; each grammar is
+				// lazily fetched only when a block of that language first appears.
+				markdown({ codeLanguages: languages }),
 				EditorView.lineWrapping,
 				// Fallback Tab → indent when LaTeX Suite did not handle it.
 				keymap.of([indentWithTab]),

@@ -263,6 +263,13 @@ body {
 	overflow: auto;
 }
 
+/* highlight.js sets its own background/padding on the code element; keep the
+   app's <pre> styling and let only the token colors come from the CDN theme. */
+.markdown-preview pre code.hljs {
+	background: transparent;
+	padding: 0;
+}
+
 .markdown-preview blockquote {
 	margin: 0;
 	padding-left: 14px;

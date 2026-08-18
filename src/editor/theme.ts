@@ -105,6 +105,25 @@ function makeEditorTheme(p: EditorPalette): Extension {
 		// Formatting marks (HeaderMark "#", EmphasisMark "*", ListMark, etc.)
 		{ tag: t.processingInstruction, color: p.mark },
 		{ tag: t.comment, color: p.comment, fontStyle: "italic" },
+		// Programming-language tokens inside fenced code blocks. These reuse the
+		// theme's existing palette so each family stays visually consistent.
+		{
+			tag: [t.keyword, t.moduleKeyword, t.controlKeyword, t.operatorKeyword],
+			color: p.heading,
+		},
+		{ tag: [t.string, t.special(t.string), t.regexp], color: p.list },
+		{ tag: [t.number, t.bool, t.atom, t.null], color: p.bold },
+		{
+			tag: [t.function(t.variableName), t.function(t.propertyName), t.macroName],
+			color: p.link,
+		},
+		{ tag: [t.typeName, t.className, t.namespace, t.tagName], color: p.italic },
+		{ tag: [t.propertyName, t.attributeName, t.labelName], color: p.link },
+		{ tag: [t.escape, t.meta], color: p.mark },
+		{
+			tag: [t.operator, t.punctuation, t.separator, t.bracket, t.derefOperator],
+			color: p.mark,
+		},
 	]);
 
 	// Prec.high so a theme's highlight wins over basicSetup's default one.

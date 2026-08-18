@@ -12,6 +12,7 @@ import {
 } from "./editor/theme";
 import { renderMarkdown } from "./preview/render";
 import { initMathActions } from "./preview/math-actions";
+import { highlightCodeBlocks, setHighlightMode } from "./preview/highlight";
 import { copyAsyncText, copyToClipboard } from "./clipboard";
 import { buildShareUrl, decodeDoc, getSharedPayload } from "./share";
 import { loadDoc, saveDoc, debounce } from "./storage";
@@ -100,6 +101,7 @@ function applyTheme() {
 	const key = themeKey(family, mode);
 	document.body.dataset.theme = key;
 	if (view) setEditorTheme(view, key);
+	setHighlightMode(mode);
 	for (const item of Array.from(themeMenu.children) as HTMLElement[]) {
 		item.classList.toggle("active", item.dataset.family === family);
 	}
@@ -113,6 +115,7 @@ applyTheme();
 // ---- Editor + preview ----
 const render = (doc: string) => {
 	preview.innerHTML = renderMarkdown(doc);
+	highlightCodeBlocks(preview);
 };
 const scheduleRender = debounce(render, 80);
 const scheduleSave = debounce(saveDoc, 300);
