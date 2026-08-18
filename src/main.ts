@@ -55,6 +55,7 @@ const themeBtn = document.getElementById("btn-theme") as HTMLButtonElement;
 const themeMenu = document.getElementById("theme-menu") as HTMLElement;
 const modeBtn = document.getElementById("btn-mode") as HTMLButtonElement;
 const syncBtn = document.getElementById("btn-sync") as HTMLButtonElement;
+const paneBtn = document.getElementById("btn-pane") as HTMLButtonElement;
 const resetBtn = document.getElementById("btn-reset") as HTMLButtonElement;
 
 // Editor handle, declared early so applyTheme can reach it once it exists.
@@ -247,6 +248,30 @@ async function maybeLoadSharedDoc(v: EditorView) {
 		changes: { from: 0, to: v.state.doc.length, insert: text },
 	});
 }
+
+// ---- Mobile pane toggle (editor / rendered output) ----
+// On narrow screens the two panes don't fit side by side, so only one is shown
+// at a time — the rendered output by default. On desktop the CSS ignores this.
+type Pane = "preview" | "editor";
+let pane: Pane = "preview";
+
+function applyPane() {
+	document.body.dataset.pane = pane;
+	const showsEditor = pane === "editor";
+	paneBtn.textContent = showsEditor ? "👁️ Preview" : "✏️ Edit";
+	paneBtn.setAttribute(
+		"aria-label",
+		showsEditor ? "Show the rendered output" : "Show the editor",
+	);
+	// CodeMirror can't measure itself while hidden; re-measure once it's back.
+	if (showsEditor) view?.requestMeasure();
+}
+applyPane();
+
+paneBtn.addEventListener("click", () => {
+	pane = pane === "preview" ? "editor" : "preview";
+	applyPane();
+});
 
 // ---- Theme dropdown ----
 function setThemeMenuOpen(open: boolean) {
